@@ -56,19 +56,29 @@ def upload_csv():
     uploaded_file = request.files.get('file')
     if uploaded_file and uploaded_file.filename.endswith('.csv'):
         try:
+            # Debugging: Name der Datei anzeigen
+            print(f"Dateiname: {uploaded_file.filename}")
+
             # CSV-Datei lesen
             csv_data = pd.read_csv(uploaded_file)
+            print(f"CSV erfolgreich geladen: {csv_data.head()}")  # Debugging: Zeige erste Zeilen der CSV
+
             # Überprüfen, ob die erforderlichen Spalten vorhanden sind
             required_columns = {"product_name", "review_text"}
             if required_columns.issubset(csv_data.columns):
                 # Eindeutige Produktnamen extrahieren
                 products = csv_data["product_name"].dropna().unique().tolist()
+                print(f"Eindeutige Produkte: {products}")  # Debugging: Zeige die extrahierten Produkte
                 return jsonify({"status": "success", "products": products})
             else:
+                print("Erforderliche Spalten fehlen.")  # Debugging: Spalten fehlen
                 return jsonify({"status": "error", "message": "Spalte 'product_name' und/oder 'review_text' fehlt."})
         except Exception as e:
+            print(f"Fehler beim Verarbeiten der CSV: {str(e)}")  # Debugging: Zeige Fehler
             return jsonify({"status": "error", "message": str(e)})
+    print("Keine gültige Datei hochgeladen.")  # Debugging: Keine Datei
     return jsonify({"status": "error", "message": "Keine gültige CSV-Datei hochgeladen."})
+
 
 
 
@@ -76,19 +86,11 @@ def upload_csv():
 @app.route('/analyze', methods=['POST'])
 def analyze():
     product = request.form.get('product')
-    conn = get_db_connection()
+    if not product:
+        return "Kein Produkt ausgewählt. Bitte zurückgehen und ein Produkt auswählen.", 400
 
-    # Metadaten der Analyse speichern
-    cursor = conn.cursor()
-    cursor.execute(
-        '''
-        INSERT INTO analysis (product_name) 
-        VALUES (?)
-        ''',
-        (product,)
-    )
-    conn.commit()
-    analysis_id = cursor.lastrowid
+    print(f"Produkt ausgewählt: {product}")
+    conn = get_db_connection()
 
     # Rezensionen für das Produkt abrufen
     reviews = pd.read_sql(
@@ -97,11 +99,22 @@ def analyze():
         params=(product,)
     )
 
-    # Sentiment-Analyse durchführen
+    print(f"Anzahl Rezensionen gefunden: {len(reviews)}")
+
+    if reviews.empty:
+        conn.close()
+        return f"Keine Rezensionen für das Produkt '{product}' gefunden.", 404
+
+    # Sentiment-Analyse
     sentiment_pipeline = pipeline("sentiment-analysis", model="cardiffnlp/twitter-roberta-base-sentiment")
     reviews['sentiment'] = reviews['review_text'].apply(lambda x: translate_label(sentiment_pipeline(x[:512])[0]['label']))
+    print(f"Sentiment-Analyse abgeschlossen für {len(reviews)} Rezensionen.")
 
-    # Ergebnisse speichern
+    # Ergebnisse speichern und CSV generieren
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO analysis (product_name) VALUES (?)", (product,))
+    analysis_id = cursor.lastrowid
+
     for _, row in reviews.iterrows():
         cursor.execute(
             '''
@@ -119,13 +132,14 @@ def analyze():
     reviews.to_csv(output, index=False)
     output.seek(0)
 
-    # CSV-Datei als Download bereitstellen
+    print("CSV generiert und bereitgestellt.")
     return send_file(
         io.BytesIO(output.getvalue().encode('utf-8')),
         mimetype='text/csv',
         as_attachment=True,
         download_name=f"{product}_sentiment_analysis.csv"
     )
+
 
 
 @app.route('/validate_csv', methods=['POST'])

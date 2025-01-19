@@ -36,12 +36,13 @@
         <!-- Button -->
         <form id="analyze-form" action="/analyze" method="POST">
             <input type="hidden" name="product" id="hidden-product">
-            <button id="analyze-button" type="submit" class="btn" disabled>Analyse durchführen</button>
+            <button id="analyze-button" type="submit" class="btn">Analyse durchführen</button>
         </form>
     </div>
 </div>
 
 <script>
+    // Event-Listener für CSV-Upload
     document.getElementById('csv-upload').addEventListener('change', function(event) {
         const file = event.target.files[0];
         const validationMessage = document.getElementById('csv-validation-message');
@@ -61,7 +62,7 @@
                 .then(data => {
                     if (data.status === 'success') {
                         // Dropdown aktualisieren
-                        dropdown.innerHTML = ''; // Bestehende Optionen entfernen
+                        dropdown.innerHTML = '';
                         data.products.forEach(product => {
                             const option = document.createElement('option');
                             option.value = product;
@@ -69,24 +70,43 @@
                             dropdown.appendChild(option);
                         });
                         validationMessage.style.display = 'none';
-                        analyzeButton.disabled = false;
+                        analyzeButton.disabled = false; // Button aktivieren
                     } else {
                         validationMessage.style.display = 'block';
-                        validationMessage.textContent = data.message;
+                        validationMessage.textContent = data.message || "Fehler beim Hochladen der Datei.";
                         analyzeButton.disabled = true;
                     }
                 })
                 .catch(error => {
-                    console.error('Fehler bei der Validierung der CSV:', error);
+                    console.error('Fehler bei der API-Verbindung:', error);
                     validationMessage.style.display = 'block';
-                    validationMessage.textContent = 'Fehler beim Hochladen der Datei. Überprüfen Sie die Spaltennamen Ihrer CSV.';
+                    validationMessage.textContent = 'Fehler beim Hochladen der Datei.';
                     analyzeButton.disabled = true;
                 });
+        } else {
+            validationMessage.style.display = 'block';
+            validationMessage.textContent = 'Bitte wählen Sie eine gültige CSV-Datei aus.';
+            analyzeButton.disabled = true;
         }
     });
 
+
+    // Event-Listener für Änderungen im Dropdown
+    document.getElementById('product').addEventListener('change', function() {
+        const analyzeButton = document.getElementById('analyze-button');
+        const selectedProduct = document.getElementById('product').value;
+
+        if (selectedProduct) {
+            analyzeButton.disabled = false; // Button aktivieren, wenn ein Produkt ausgewählt ist
+        } else {
+            analyzeButton.disabled = true; // Button deaktivieren, wenn kein Produkt ausgewählt ist
+        }
+    });
+
+    // Event-Listener für das Absenden des Formulars
     document.getElementById('analyze-form').addEventListener('submit', function(event) {
         const selectedProduct = document.getElementById('product').value;
+        const hiddenProductInput = document.getElementById('hidden-product');
 
         if (!selectedProduct) {
             event.preventDefault(); // Verhindere das Absenden des Formulars
@@ -94,11 +114,10 @@
             return;
         }
 
-        document.getElementById('hidden-product').value = selectedProduct;
+        // Setze das versteckte Eingabefeld mit dem ausgewählten Produkt
+        hiddenProductInput.value = selectedProduct;
     });
 </script>
-
-
 
 </body>
 </html>
