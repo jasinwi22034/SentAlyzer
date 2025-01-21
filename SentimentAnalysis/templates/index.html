@@ -9,15 +9,15 @@
 <body>
 <div class="main-container">
     <div class="content">
-        <h1>Amazon Sentiment Analysis</h1>
-        <p>Wählen Sie ein Produkt aus und führen Sie eine Sentiment-Analyse durch.</p>
+        <h1>SentAlyze</h1>
+        <p>Laden Sie Ihre Produktdaten hoch und führen Sie eine Sentiment-Analyse durch. Alternativ wählen Sie eines der bestehenden Amazon-Produkte aus.</p>
 
         <!-- CSV Upload -->
         <div class="form-group">
             <label for="csv-upload">CSV-Datei hochladen:</label>
             <div class="upload-container">
                 <input type="file" id="csv-upload" name="csv-upload" accept=".csv">
-                <span class="info-icon" title="Laden Sie eine CSV-Datei mit Produktnamen und Bewertungen hoch.">ℹ️</span>
+                <span class="info-icon" title="Laden Sie hier Ihre eigene CSV-Datei mit Produktnamen und Rezensionen hoch. Achten Sie dabei auf folgende Spaltenbenennung: product_name und review_text.">ℹ️</span>
             </div>
             <p id="csv-validation-message" style="color: red; display: none;"></p>
         </div>
