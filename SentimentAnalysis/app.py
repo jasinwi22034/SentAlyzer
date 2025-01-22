@@ -3,6 +3,8 @@ import sqlite3
 import pandas as pd
 from transformers import pipeline
 import io
+import matplotlib.pyplot as plt
+import base64
 
 app = Flask(__name__)
 
@@ -140,6 +142,89 @@ def analyze():
         download_name=f"{product}_sentiment_analysis.csv"
     )
 
+    # Weiterleitung zur Detailed Analysis Page
+    return redirect(url_for('detailed_analysis', product=product))
+
+@app.route('/detailed_analysis/<product>', methods=['GET'])
+def detailed_analysis(product):
+    conn = get_db_connection()
+
+    # Daten für das Produkt abrufen
+    sentiments = pd.read_sql(
+        "SELECT sentiment FROM sentiment_analysis WHERE analysis_id IN (SELECT id FROM analysis WHERE product_name = ?)",
+        conn,
+        params=(product,)
+    )
+    conn.close()
+
+    if sentiments.empty:
+        return f"Keine Analyseergebnisse für das Produkt '{product}' gefunden.", 404
+
+    # Sentiment-Zählungen berechnen
+    sentiment_counts = sentiments['sentiment'].value_counts()
+
+    # Kreisdiagramm erstellen
+    plt.figure(figsize=(6, 6))
+    plt.pie(
+        sentiment_counts,
+        labels=sentiment_counts.index,
+        autopct='%1.1f%%',
+        startangle=140,
+        colors=['#4CAF50', '#FFC107', '#F44336']
+    )
+    plt.title(f'Sentiment-Verteilung für "{product}"')
+
+    # Diagramm in Base64 umwandeln
+    img = io.BytesIO()
+    plt.savefig(img, format='png')
+    img.seek(0)
+    plot_url = base64.b64encode(img.getvalue()).decode()
+    plt.close()
+
+    # HTML-Template rendern
+    return render_template('detailed_analysis.html', product=product, plot_url=plot_url)
+
+@app.route('/download_chart/<product>', methods=['GET'])
+def download_chart(product):
+    conn = get_db_connection()
+
+    # Daten für das Produkt abrufen
+    sentiments = pd.read_sql(
+        "SELECT sentiment FROM sentiment_analysis WHERE analysis_id IN (SELECT id FROM analysis WHERE product_name = ?)",
+        conn,
+        params=(product,)
+    )
+    conn.close()
+
+    if sentiments.empty:
+        return "Keine Analyseergebnisse vorhanden.", 404
+
+    # Sentiment-Zählungen berechnen
+    sentiment_counts = sentiments['sentiment'].value_counts()
+
+    # Kreisdiagramm erstellen
+    plt.figure(figsize=(6, 6))
+    plt.pie(
+        sentiment_counts,
+        labels=sentiment_counts.index,
+        autopct='%1.1f%%',
+        startangle=140,
+        colors=['#4CAF50', '#FFC107', '#F44336']
+    )
+    plt.title(f'Sentiment-Verteilung für "{product}"')
+
+    # Diagramm als Datei bereitstellen
+    img = io.BytesIO()
+    plt.savefig(img, format='png')
+    img.seek(0)
+    plt.close()
+
+    return send_file(
+        io.BytesIO(img.getvalue()),
+        mimetype='image/png',
+        as_attachment=True,
+        download_name=f"{product}_sentiment_chart.png"
+    )
 
 
 @app.route('/validate_csv', methods=['POST'])

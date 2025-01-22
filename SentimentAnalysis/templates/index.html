@@ -39,10 +39,10 @@
             <p>Analyse wird durchgeführt... Bitte warten.</p>
         </div>
 
-        <!-- Button -->
+        <!-- Analyse Button -->
         <form id="analyze-form" action="/analyze" method="POST">
             <input type="hidden" name="product" id="hidden-product">
-            <button id="analyze-button" type="submit" class="btn">Analyse durchführen</button>
+            <button id="analyze-button" type="submit" class="analyze-btn">Analyse durchführen</button>
         </form>
     </div>
 </div>
@@ -111,6 +111,7 @@
 
     // Event-Listener für das Absenden des Formulars
     document.getElementById('analyze-form').addEventListener('submit', function(event) {
+        event.preventDefault(); // Verhindere das Standardformular-Verhalten
         const selectedProduct = document.getElementById('product').value;
         const hiddenProductInput = document.getElementById('hidden-product');
         const loadingMessage = document.getElementById('loading-message');
@@ -127,6 +128,7 @@
 
         // Zeige den Spinner und die Nachricht an
         loadingMessage.style.display = 'flex';
+        analyzeButton.disabled = true;
 
         // Sende die Anfrage an den Server
         const formData = new FormData(document.getElementById('analyze-form'));
@@ -150,6 +152,8 @@
                 document.body.appendChild(a);
                 a.click();
                 a.remove();
+                // Weiterleitung zur Detailed Analysis Page
+                window.location.href = `/detailed_analysis/${encodeURIComponent(selectedProduct)}`;
             })
             .catch((error) => {
                 console.error(error);

@@ -63,8 +63,8 @@ select {
     outline: none;
 }
 
-/* Button */
-.btn {
+/* Analyse durchführen Button */
+.analyze-btn {
     background-color: #0066cc;
     color: #ffffff;
     font-size: 16px;
@@ -74,12 +74,60 @@ select {
     cursor: pointer;
     width: 100%;
     transition: background-color 0.3s ease;
+    margin-top: 10px;
 }
 
-/* Hover-Effekt für den Button */
-.btn:hover {
+.analyze-btn:hover {
     background-color: #0052a3;
 }
+
+
+/* Download-Button */
+.download-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #0066cc;
+    color: #ffffff;
+    font-size: 16px;
+    padding: 8px;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 0px;
+    margin-bottom: 30px;
+}
+
+.download-btn:hover {
+    background-color: #0052a3;
+}
+
+/* Zurück zur Startseite Button */
+.back-btn {
+    background-color: #0066cc;
+    color: #ffffff;
+    font-size: 16px;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+    transition: background-color 0.3s ease;
+    margin-top: 40px; /* Größerer Abstand zum Download-Button */
+}
+
+.back-btn:hover {
+    background-color: #0052a3;
+}
+
+
+.back-btn:hover {
+    background-color: #0052a3;
+}
+
 
 /* Upload-Bereich */
 .upload-container {
@@ -138,6 +186,23 @@ select {
     color: #333;
 }
 
+
+/* Detailed Analysis Page */
+.chart-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.chart-container img {
+    max-width: 80%;
+    height: auto;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 10px;
+    background-color: #f9f9f9;
+}
 
 
 /* Responsive Design */
