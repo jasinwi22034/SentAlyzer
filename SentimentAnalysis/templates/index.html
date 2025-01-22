@@ -33,6 +33,12 @@
             </select>
         </div>
 
+        <!-- Spinner und Nachricht -->
+        <div id="loading-message" class="center-spinner" style="display: none;">
+            <div class="spinner"></div>
+            <p>Analyse wird durchgeführt... Bitte warten.</p>
+        </div>
+
         <!-- Button -->
         <form id="analyze-form" action="/analyze" method="POST">
             <input type="hidden" name="product" id="hidden-product">
@@ -107,6 +113,8 @@
     document.getElementById('analyze-form').addEventListener('submit', function(event) {
         const selectedProduct = document.getElementById('product').value;
         const hiddenProductInput = document.getElementById('hidden-product');
+        const loadingMessage = document.getElementById('loading-message');
+        const analyzeButton = document.getElementById('analyze-button');
 
         if (!selectedProduct) {
             event.preventDefault(); // Verhindere das Absenden des Formulars
@@ -116,6 +124,43 @@
 
         // Setze das versteckte Eingabefeld mit dem ausgewählten Produkt
         hiddenProductInput.value = selectedProduct;
+
+        // Zeige den Spinner und die Nachricht an
+        loadingMessage.style.display = 'flex';
+
+        // Sende die Anfrage an den Server
+        const formData = new FormData(document.getElementById('analyze-form'));
+
+        fetch('/analyze', {
+            method: 'POST',
+            body: formData,
+        })
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error('Fehler bei der Analyse.');
+                }
+                return response.blob(); // CSV-Datei als Blob empfangen
+            })
+            .then((blob) => {
+                // Erstelle einen Download-Link für die CSV-Datei
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${selectedProduct}_sentiment_analysis.csv`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+            })
+            .catch((error) => {
+                console.error(error);
+                alert('Es ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.');
+            })
+            .finally(() => {
+                // Spinner ausblenden und Button wieder aktivieren
+                loadingMessage.style.display = 'none';
+                analyzeButton.disabled = false;
+            });
+
     });
 </script>
 
