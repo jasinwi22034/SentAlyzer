@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amazon Product Sentiment Analysis</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="main-container">
+    <div class="content">
+        <h1>SentAlyzer</h1>
+        <p>Laden Sie Ihre Produktdaten hoch und führen Sie eine Sentiment-Analyse durch. Alternativ wählen Sie eines der bestehenden Amazon-Produkte aus.</p>
+
+        <!-- CSV Upload -->
+        <div class="form-group">
+            <label for="csv-upload">CSV-Datei hochladen:</label>
+            <div class="upload-container">
+                <input type="file" id="csv-upload" name="csv-upload" accept=".csv">
+                <span class="info-icon" title="Laden Sie hier Ihre eigene CSV-Datei mit Produktnamen und Rezensionen hoch. Achten Sie dabei auf folgende Spaltenbenennung: product_name und review_text.">ℹ️</span>
+            </div>
+            <p id="csv-validation-message" style="color: red; display: none;"></p>
+        </div>
+
+        <!-- Dropdown -->
+        <div class="form-group">
+            <label for="product">Produkt auswählen:</label>
+            <select id="product" name="product" required>
+                <!-- Standardoptionen werden serverseitig geladen -->
+                {% for product in products %}
+                    <option value="{{ product }}">{{ product }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Spinner und Nachricht -->
+        <div id="loading-message" class="center-spinner" style="display: none;">
+            <div class="spinner"></div>
+            <p>Analyse wird durchgeführt... Bitte warten.</p>
+        </div>
+
+        <!-- Analyse Button -->
+        <form id="analyze-form" action="/analyze" method="POST">
+            <input type="hidden" name="product" id="hidden-product">
+            <button id="analyze-button" type="submit" class="analyze-btn">Analyse durchführen</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Event-Listener für CSV-Upload
+    document.getElementById('csv-upload').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        const validationMessage = document.getElementById('csv-validation-message');
+        const analyzeButton = document.getElementById('analyze-button');
+        const dropdown = document.getElementById('product');
+
+        if (file) {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            // CSV-Validierung via API
+            fetch('/upload_csv', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        // Dropdown aktualisieren
+                        dropdown.innerHTML = '';
+                        data.products.forEach(product => {
+                            const option = document.createElement('option');
+                            option.value = product;
+                            option.textContent = product;
+                            dropdown.appendChild(option);
+                        });
+                        validationMessage.style.display = 'none';
+                        analyzeButton.disabled = false; // Button aktivieren
+                    } else {
+                        validationMessage.style.display = 'block';
+                        validationMessage.textContent = data.message || "Fehler beim Hochladen der Datei.";
+                        analyzeButton.disabled = true;
+                    }
+                })
+                .catch(error => {
+                    console.error('Fehler bei der API-Verbindung:', error);
+                    validationMessage.style.display = 'block';
+                    validationMessage.textContent = 'Fehler beim Hochladen der Datei.';
+                    analyzeButton.disabled = true;
+                });
+        } else {
+            validationMessage.style.display = 'block';
+            validationMessage.textContent = 'Bitte wählen Sie eine gültige CSV-Datei aus.';
+            analyzeButton.disabled = true;
+        }
+    });
+
+
+    // Event-Listener für Änderungen im Dropdown
+    document.getElementById('product').addEventListener('change', function() {
+        const analyzeButton = document.getElementById('analyze-button');
+        const selectedProduct = document.getElementById('product').value;
+
+        if (selectedProduct) {
+            analyzeButton.disabled = false; // Button aktivieren, wenn ein Produkt ausgewählt ist
+        } else {
+            analyzeButton.disabled = true; // Button deaktivieren, wenn kein Produkt ausgewählt ist
+        }
+    });
+
+    // Event-Listener für das Absenden des Formulars
+    document.getElementById('analyze-form').addEventListener('submit', function(event) {
+        event.preventDefault(); // Verhindere das Standardformular-Verhalten
+        const selectedProduct = document.getElementById('product').value;
+        const hiddenProductInput = document.getElementById('hidden-product');
+        const loadingMessage = document.getElementById('loading-message');
+        const analyzeButton = document.getElementById('analyze-button');
+
+        if (!selectedProduct) {
+            event.preventDefault(); // Verhindere das Absenden des Formulars
+            alert('Bitte wählen Sie ein Produkt aus!');
+            return;
+        }
+
+        // Setze das versteckte Eingabefeld mit dem ausgewählten Produkt
+        hiddenProductInput.value = selectedProduct;
+
+        // Zeige den Spinner und die Nachricht an
+        loadingMessage.style.display = 'flex';
+        analyzeButton.disabled = true;
+
+        // Sende die Anfrage an den Server
+        const formData = new FormData(document.getElementById('analyze-form'));
+
+        fetch('/analyze', {
+            method: 'POST',
+            body: formData,
+        })
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error('Fehler bei der Analyse.');
+                }
+                return response.blob(); // CSV-Datei als Blob empfangen
+            })
+            .then((blob) => {
+                // Erstelle einen Download-Link für die CSV-Datei
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${selectedProduct}_sentiment_analysis.csv`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                // Weiterleitung zur Detailed Analysis Page
+                window.location.href = `/detailed_analysis/${encodeURIComponent(selectedProduct)}`;
+            })
+            .catch((error) => {
+                console.error(error);
+                alert('Es ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.');
+            })
+            .finally(() => {
+                // Spinner ausblenden und Button wieder aktivieren
+                loadingMessage.style.display = 'none';
+                analyzeButton.disabled = false;
+            });
+
+    });
+</script>
+
+</body>
+</html>
