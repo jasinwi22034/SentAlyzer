@@ -28,23 +28,33 @@ def analyze():
         return "Kein Produkt ausgewählt.", 400
     return perform_analysis(product)
 
-@app.route('/detailed_analysis/<product>', methods=['GET'])
+@app.route('/detailed_analysis/<product>')
 def detailed_analysis(product):
     conn = get_db_connection()
 
     # Daten für das Produkt abrufen
     sentiments = pd.read_sql(
-        "SELECT sentiment FROM sentiment_analysis WHERE analysis_id IN (SELECT id FROM analysis WHERE product_name = ?)",
+        "SELECT sentiment, review_text FROM sentiment_analysis WHERE analysis_id IN (SELECT id FROM analysis WHERE product_name = ?)",
         conn,
         params=(product,)
     )
     conn.close()
 
     if sentiments.empty:
-        return f"Keine Analyseergebnisse für das Produkt '{product}' gefunden.", 404
+        abort(404, description=f"Keine Analyseergebnisse für das Produkt '{product}' gefunden.")
 
     # Sentiment-Zählungen berechnen
     sentiment_counts = sentiments['sentiment'].value_counts()
+    total_reviews = sentiments.shape[0]
+
+    # Prozentuale Verteilung der Sentimente
+    sentiment_percentages = (sentiment_counts / total_reviews * 100).round(2)
+
+    # Durchschnittliche Länge der Rezensionen
+    avg_review_length = sentiments['review_text'].apply(lambda x: len(x.split())).mean().round(2)
+
+    # Dominierendes Sentiment
+    dominant_sentiment = sentiment_counts.idxmax()
 
     # Kreisdiagramm erstellen
     plt.figure(figsize=(6, 6))
@@ -64,8 +74,17 @@ def detailed_analysis(product):
     plot_url = base64.b64encode(img.getvalue()).decode()
     plt.close()
 
-    # HTML-Template rendern
-    return render_template('detailed_analysis.html', product=product, plot_url=plot_url)
+    # Statistiken an das Template übergeben
+    stats = {
+        "total_reviews": total_reviews,
+        "sentiment_counts": sentiment_counts.to_dict(),
+        "sentiment_percentages": sentiment_percentages.to_dict(),
+        "avg_review_length": avg_review_length,
+        "dominant_sentiment": dominant_sentiment,
+    }
+
+    return render_template('detailed_analysis.html', product=product, plot_url=plot_url, stats=stats)
+
 
 if __name__ == '__main__':
     app.run(debug=True)

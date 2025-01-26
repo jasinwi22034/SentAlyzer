@@ -81,7 +81,6 @@ select {
     background-color: #0052a3;
 }
 
-
 /* Download-Button */
 .download-btn {
     display: inline-flex;
@@ -105,6 +104,7 @@ select {
     background-color: #0052a3;
 }
 
+
 /* Zurück zur Startseite Button */
 .back-btn {
     background-color: #0066cc;
@@ -117,12 +117,8 @@ select {
     width: 100%;
     transition: background-color 0.3s ease;
     margin-top: 40px; /* Größerer Abstand zum Download-Button */
+    text-decoration: none;
 }
-
-.back-btn:hover {
-    background-color: #0052a3;
-}
-
 
 .back-btn:hover {
     background-color: #0052a3;
@@ -189,10 +185,35 @@ select {
 
 /* Detailed Analysis Page */
 .chart-container {
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    text-align: center;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
-    margin-top: 20px;
+    justify-content: center;
+    gap: 15px; /* Abstand zwischen Diagramm und Button */
+}
+
+.chart-container .download-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #0066cc;
+    color: white;
+    text-decoration: none;
+    padding: 5px;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    margin-top: 10px;
+    transition: background-color 0.3s ease;
+}
+
+.chart-container .download-btn:hover {
+    background-color: #0052a3;
 }
 
 .chart-container img {
@@ -204,6 +225,88 @@ select {
     background-color: #f9f9f9;
 }
 
+/* Dashboard-Layout */
+.dashboard-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    display: grid;
+    grid-template-columns: 2fr 3fr; /* 2 Teile für Statistiken, 3 Teile für Diagramm */
+    grid-gap: 20px;
+    align-items: center; /* Vertikale Zentrierung der Grid-Elemente */
+}
+
+/* Überschrift über die gesamte Breite */
+.dashboard-container h1 {
+    color: #ffffff;
+    font-size: 24px;
+    font-weight: bold;
+    grid-column: 1 / -1;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Statistiken */
+.stats-container {
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Inhalt vertikal zentrieren */
+    height: auto; /* Passt sich der Größe des Inhalts an */
+}
+
+.stats-container h2 {
+    font-size: 20px;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.stats-container ul {
+    list-style: none;
+    padding: 0;
+}
+
+.stats-container ul li {
+    margin-bottom: 5px;
+    color: #555;
+}
+
+/* Kreisdiagramm */
+.chart-container {
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    text-align: center;
+}
+
+.chart-container h2 {
+    font-size: 20px;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+/* Kreisdiagramm */
+.chart-container img {
+    max-width: 100%; /* Verhindert Überschreiten der Container-Breite */
+    max-height: 300px; /* Begrenzung der maximalen Höhe */
+    height: auto; /* Proportionale Skalierung */
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    margin: 0 auto;
+}
+
+
+/* Buttons */
+.buttons-container {
+    grid-column: 1 / -1;
+    text-align: center;
+    margin-top: 20px;
+}
 
 /* Responsive Design */
 @media (max-width: 768px) {

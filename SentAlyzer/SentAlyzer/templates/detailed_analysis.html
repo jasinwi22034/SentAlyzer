@@ -3,31 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detailed Analysis - {{ product }}</title>
-    <link rel="stylesheet" href="/static/style.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <title>SentAlyzer - {{ product }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-<div class="main-container">
-    <div class="content">
-        <h1>Detailed Analysis für "{{ product }}"</h1>
-        <p>Hier sind die Ergebnisse der Sentiment-Analyse:</p>
+<div class="dashboard-container">
+    <h1>Detaillierte Analyse für "{{ product }}"</h1>
 
-        <!-- Kreisdiagramm -->
-        <div class="chart-container">
-            <img src="data:image/png;base64,{{ plot_url }}" alt="Sentiment-Verteilung">
-        </div>
+    <!-- Statistiken -->
+    <div class="stats-container">
+        <h2>Statistiken</h2>
+        <ul>
+            <li><strong>Gesamtanzahl der Rezensionen:</strong> {{ stats.total_reviews }}</li>
+            <li><strong>Positive Sentimente:</strong> {{ stats.sentiment_counts.positive }} ({{ stats.sentiment_percentages.positive }}%)</li>
+            <li><strong>Neutrale Sentimente:</strong> {{ stats.sentiment_counts.neutral }} ({{ stats.sentiment_percentages.neutral }}%)</li>
+            <li><strong>Negative Sentimente:</strong> {{ stats.sentiment_counts.negative }} ({{ stats.sentiment_percentages.negative }}%)</li>
+            <li><strong>Durchschnittliche Länge der Rezensionen:</strong> {{ stats.avg_review_length }} Wörter</li>
+            <li><strong>Dominierendes Sentiment:</strong> {{ stats.dominant_sentiment }}</li>
+        </ul>
+    </div>
 
-        <!-- Download-Button für das Diagramm -->
-        <div style="text-align: center; margin-top: 20px;">
-            <a href="/download_chart/{{ product }}" class="download-btn" download title="Diagramm herunterladen">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="white">
-                    <path d="M12 16.5l6-6h-4V3h-4v7.5H6l6 6zm-9 4.5v-2h18v2H3z"/>
-                </svg>
-            </a>
-        </div>
+    <!-- Kreisdiagramm -->
+    <div class="chart-container">
+        <h2>Sentiment-Verteilung</h2>
+        <img src="data:image/png;base64,{{ plot_url }}" alt="Sentiment-Verteilung">
+        <a href="/download_chart/{{ product }}" class="download-btn" download title="Diagramm herunterladen">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="white">
+                <path d="M12 16.5l6-6h-4V3h-4v7.5H6l6 6zm-9 4.5v-2h18v2H3z"/>
+            </svg>
+        </a>
+    </div>
 
-        <!-- Zurück zur Startseite Button -->
+    <!-- Buttons -->
+    <div class="buttons-container">
         <a href="/" class="back-btn">Zurück zur Startseite</a>
     </div>
 </div>
