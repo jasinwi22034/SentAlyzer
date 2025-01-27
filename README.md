@@ -1,1 +1,1 @@
-# SE_Assignment_AmazonReview
+# Software Engineering Assignment - SentAlyzer by Jasin Doughmani
