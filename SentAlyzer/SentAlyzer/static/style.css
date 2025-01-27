@@ -197,6 +197,29 @@ select {
     gap: 15px; /* Abstand zwischen Diagramm und Button */
 }
 
+/* Toggle-Buttons für Diagramm-Wechsel */
+.chart-toggle-buttons {
+    display: flex;
+    justify-content: space-between;
+    width: 100px;
+    margin-top: 10px;
+}
+
+.chart-nav-btn {
+    background-color: #0066cc;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+.chart-nav-btn:hover {
+    background-color: #0052a3;
+}
+
 .chart-container .download-btn {
     display: inline-flex;
     align-items: center;

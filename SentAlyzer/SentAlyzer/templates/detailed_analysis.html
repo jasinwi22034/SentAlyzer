@@ -23,21 +23,74 @@
         </ul>
     </div>
 
-    <!-- Kreisdiagramm -->
+    <!-- Diagramme -->
     <div class="chart-container">
-        <h2>Sentiment-Verteilung</h2>
-        <img src="data:image/png;base64,{{ plot_url }}" alt="Sentiment-Verteilung">
-        <a href="/download_chart/{{ product }}" class="download-btn" download title="Diagramm herunterladen">
+        <h2 id="chart-title"></h2>
+        <img id="chart-img" src="" alt="Diagramm wird geladen...">
+        <div class="chart-toggle-buttons">
+            <button id="prev-chart" class="chart-nav-btn">←</button>
+            <button id="next-chart" class="chart-nav-btn">→</button>
+        </div>
+        <a id="download-btn" class="download-btn" download>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="white">
-                <path d="M12 16.5l6-6h-4V3h-4v7.5H6l6 6zm-9 4.5v-2h18v2H3z"/>
+                <path d="M12 16.5l6-6h-4V3h-4v7.5H6l6 6zm-9 4.5v-2h18v2H3z" />
             </svg>
         </a>
     </div>
+
+
 
     <!-- Buttons -->
     <div class="buttons-container">
         <a href="/" class="back-btn">Zurück zur Startseite</a>
     </div>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        // Elemente referenzieren
+        const chartImg = document.getElementById("chart-img");
+        const chartTitle = document.getElementById("chart-title");
+        const downloadBtn = document.getElementById("download-btn");
+
+        // Daten für Diagramme
+        const charts = [
+            {
+                src: "{{ circle_plot_url }}", // Base64-Daten des Kreisdiagramms
+                title: "Sentiment-Verteilung",
+                downloadUrl: "/download_circle_chart/{{ product }}"
+            },
+            {
+                src: "{{ bar_plot_url }}", // Base64-Daten des Balkendiagramms
+                title: "Sentiment-Häufigkeit",
+                downloadUrl: "/download_bar_chart/{{ product }}"
+            }
+        ];
+
+        let currentChartIndex = 0;
+
+        // Funktionen für den Diagrammwechsel
+        function updateChart() {
+            const currentChart = charts[currentChartIndex];
+            chartImg.src = `data:image/png;base64,${currentChart.src}`;
+            chartTitle.textContent = currentChart.title;
+            downloadBtn.href = currentChart.downloadUrl;
+        }
+
+        document.getElementById("prev-chart").addEventListener("click", () => {
+            currentChartIndex = (currentChartIndex - 1 + charts.length) % charts.length;
+            updateChart();
+        });
+
+        document.getElementById("next-chart").addEventListener("click", () => {
+            currentChartIndex = (currentChartIndex + 1) % charts.length;
+            updateChart();
+        });
+
+        // Initiales Diagramm setzen
+        updateChart();
+    });
+</script>
+
 </body>
 </html>
