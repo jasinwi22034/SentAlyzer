@@ -1,5 +1,5 @@
 import pandas as pd
-from flask import send_file, redirect, url_for
+from flask import send_file
 from models.database import get_db_connection
 from models.sentiment import get_sentiment_pipeline, translate_label
 import io

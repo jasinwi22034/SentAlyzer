@@ -1,4 +1,3 @@
-from flask import request, jsonify
 import pandas as pd
 
 def handle_csv_upload(file):
