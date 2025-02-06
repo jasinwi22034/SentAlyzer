@@ -1,13 +1,18 @@
 /* Allgemeine Einstellungen */
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+html, body {
+    height: 100%;
     margin: 0;
     padding: 0;
+    background: linear-gradient(135deg, #0066cc, #003d99); /* Einheitlicher Hintergrund */
+    overflow-x: hidden; /* Verhindert horizontales Scrollen */
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
-    background: linear-gradient(135deg, #0066cc, #003d99);
     color: #ffffff;
 }
 
