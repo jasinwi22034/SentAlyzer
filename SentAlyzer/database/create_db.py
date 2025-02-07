@@ -12,7 +12,7 @@ cursor = conn.cursor()
 # Schritt 2: Tabelle der Testdaten erstellen
 cursor.execute('''
     CREATE TABLE IF NOT EXISTS reviews (
-        id TEXT PRIMARY KEY,
+        product_id TEXT PRIMARY KEY,
         product_name TEXT,
         review_text TEXT,
         rating INTEGER
